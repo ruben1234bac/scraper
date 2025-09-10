@@ -7,6 +7,7 @@ defmodule Scraper.WebPagesTest do
   describe "create_web_page/1" do
     test "creates web page with valid attributes" do
       user = insert(:user)
+
       attrs = %{
         url: "https://example.com",
         title: "Example Page",
@@ -25,6 +26,7 @@ defmodule Scraper.WebPagesTest do
 
     test "creates web page with only required fields" do
       user = insert(:user)
+
       attrs = %{
         url: "https://minimal.com",
         user_id: user.id
@@ -39,6 +41,7 @@ defmodule Scraper.WebPagesTest do
 
     test "creates web page with is_completed true" do
       user = insert(:user)
+
       attrs = %{
         url: "https://completed.com",
         title: "Completed Page",
@@ -52,6 +55,7 @@ defmodule Scraper.WebPagesTest do
 
     test "returns error when url is missing" do
       user = insert(:user)
+
       attrs = %{
         title: "Page without URL",
         user_id: user.id
@@ -92,6 +96,7 @@ defmodule Scraper.WebPagesTest do
   describe "update_web_page/2" do
     test "updates web page with valid attributes" do
       web_page = insert(:web_page)
+
       attrs = %{
         url: "https://updated.com",
         title: "Updated Title",
@@ -126,14 +131,16 @@ defmodule Scraper.WebPagesTest do
     test "returns error for non-existent web page" do
       attrs = %{url: "https://updated.com"}
 
-      assert {:error, :not_found} = WebPages.update_web_page(99999, attrs)
+      assert {:error, :not_found} = WebPages.update_web_page(99_999, attrs)
     end
 
     test "returns validation error for invalid attributes" do
       web_page = insert(:web_page)
       attrs = %{url: nil}
 
-      assert {:error, %Ecto.Changeset{} = changeset} = WebPages.update_web_page(web_page.id, attrs)
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               WebPages.update_web_page(web_page.id, attrs)
+
       assert "can't be blank" in errors_on(changeset).url
     end
 
@@ -168,6 +175,7 @@ defmodule Scraper.WebPagesTest do
         from(w in WebPage, where: w.id == ^old_page.id),
         set: [inserted_at: ~U[2023-01-01 00:00:00Z]]
       )
+
       Repo.update_all(
         from(w in WebPage, where: w.id == ^new_page.id),
         set: [inserted_at: ~U[2023-12-31 00:00:00Z]]
@@ -178,7 +186,7 @@ defmodule Scraper.WebPagesTest do
       assert %Scrivener.Page{} = page_result
       assert page_result.page_number == 1
       assert length(page_result.entries) == 2
-      
+
       # Verify newest first
       [first_entry, second_entry] = page_result.entries
       assert first_entry.title == "New Page"
@@ -231,6 +239,7 @@ defmodule Scraper.WebPagesTest do
   describe "create_web_page_field/1" do
     test "creates web page field with valid attributes" do
       web_page = insert(:web_page)
+
       attrs = %{
         name: "title",
         value: "Example",
@@ -250,14 +259,14 @@ defmodule Scraper.WebPagesTest do
 
     test "creates multiple fields for same web page" do
       web_page = insert(:web_page)
-      
+
       attrs1 = %{
         name: "title",
         value: "Title",
         full_value: "Full Title",
         web_page_id: web_page.id
       }
-      
+
       attrs2 = %{
         name: "description",
         value: "Desc",
@@ -267,7 +276,7 @@ defmodule Scraper.WebPagesTest do
 
       assert {:ok, field1} = WebPages.create_web_page_field(attrs1)
       assert {:ok, field2} = WebPages.create_web_page_field(attrs2)
-      
+
       assert field1.web_page_id == web_page.id
       assert field2.web_page_id == web_page.id
       assert field1.name != field2.name
@@ -275,6 +284,7 @@ defmodule Scraper.WebPagesTest do
 
     test "returns error when name is missing" do
       web_page = insert(:web_page)
+
       attrs = %{
         value: "Value",
         full_value: "Full Value",
@@ -287,6 +297,7 @@ defmodule Scraper.WebPagesTest do
 
     test "returns error when value is missing" do
       web_page = insert(:web_page)
+
       attrs = %{
         name: "field_name",
         full_value: "Full Value",
@@ -299,6 +310,7 @@ defmodule Scraper.WebPagesTest do
 
     test "returns error when full_value is missing" do
       web_page = insert(:web_page)
+
       attrs = %{
         name: "field_name",
         value: "Value",
@@ -344,16 +356,16 @@ defmodule Scraper.WebPagesTest do
   describe "integration tests" do
     test "create web page and add fields to it" do
       user = insert(:user)
-      
+
       # Create web page
       web_page_attrs = %{
         url: "https://integration-test.com",
         title: "Integration Test Page",
         user_id: user.id
       }
-      
+
       assert {:ok, web_page} = WebPages.create_web_page(web_page_attrs)
-      
+
       # Add fields to the web page
       field_attrs = %{
         name: "main_heading",
@@ -361,18 +373,18 @@ defmodule Scraper.WebPagesTest do
         full_value: "Welcome to our site",
         web_page_id: web_page.id
       }
-      
+
       assert {:ok, field} = WebPages.create_web_page_field(field_attrs)
       assert field.web_page_id == web_page.id
     end
 
     test "update web page completion status and verify it persists" do
       web_page = insert(:web_page, is_completed: false)
-      
+
       # Mark as completed
       assert {:ok, updated_page} = WebPages.update_web_page(web_page.id, %{is_completed: true})
       assert updated_page.is_completed == true
-      
+
       # Verify it's in the list
       page_result = WebPages.list_web_pages(1)
       found_page = Enum.find(page_result.entries, &(&1.id == web_page.id))
@@ -381,25 +393,26 @@ defmodule Scraper.WebPagesTest do
 
     test "create multiple web pages and verify listing order" do
       user = insert(:user)
-      
+
       # Create pages with manual timestamp control
       {:ok, page1} = WebPages.create_web_page(%{url: "https://first.com", user_id: user.id})
       {:ok, page2} = WebPages.create_web_page(%{url: "https://second.com", user_id: user.id})
-      
+
       # Update timestamps to ensure order
       Repo.update_all(
         from(w in WebPage, where: w.id == ^page1.id),
         set: [inserted_at: ~U[2023-01-01 00:00:00Z]]
       )
+
       Repo.update_all(
         from(w in WebPage, where: w.id == ^page2.id),
         set: [inserted_at: ~U[2023-12-31 00:00:00Z]]
       )
-      
+
       # List should show newest first
       page_result = WebPages.list_web_pages(1)
       [first_listed, second_listed] = page_result.entries
-      
+
       assert first_listed.id == page2.id
       assert second_listed.id == page1.id
     end

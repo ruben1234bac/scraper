@@ -122,6 +122,7 @@ defmodule Scraper.Account.UserTest do
         password: "password123",
         password_confirmation: "password123"
       }
+
       {:ok, _user1} = %User{} |> User.changeset(attrs) |> Repo.insert()
 
       attrs2 = %{
@@ -154,9 +155,9 @@ defmodule Scraper.Account.UserTest do
         password: "test_password123",
         password_confirmation: "test_password123"
       }
+
       changeset = User.changeset(%User{}, attrs)
       assert changeset.valid?
-      
       assert {:ok, user} = Repo.insert(changeset)
       assert user.id
       assert user.inserted_at
@@ -200,6 +201,7 @@ defmodule Scraper.Account.UserTest do
         password: "test_password123",
         password_confirmation: "test_password123"
       }
+
       {:ok, user} = %User{} |> User.changeset(attrs) |> Repo.insert()
       assert Bcrypt.verify_pass("test_password123", user.password)
       refute Bcrypt.verify_pass("wrong_password", user.password)
