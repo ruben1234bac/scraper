@@ -11,6 +11,7 @@ defmodule Scraper.Application do
       ScraperWeb.Telemetry,
       Scraper.Repo,
       {DNSCluster, query: Application.get_env(:scraper, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:scraper, Oban)},
       {Phoenix.PubSub, name: Scraper.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Scraper.Finch},

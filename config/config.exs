@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+config :scraper, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  repo: Scraper.Repo
+
 config :scraper,
   ecto_repos: [Scraper.Repo],
   generators: [timestamp_type: :utc_datetime]

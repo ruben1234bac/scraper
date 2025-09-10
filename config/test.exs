@@ -1,4 +1,5 @@
 import Config
+config :scraper, Oban, testing: :manual
 
 # Configure your database
 #
