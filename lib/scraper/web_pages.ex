@@ -57,6 +57,22 @@ defmodule Scraper.WebPages do
   end
 
   @doc """
+  Gets a single web page.
+
+  ## Examples
+
+      iex> get_web_page!(1)
+      %WebPage{}
+
+  """
+  @spec get_web_page!(integer()) :: WebPage.t() | nil
+  def get_web_page!(id) do
+    WebPage
+    |> Repo.get!(id)
+    |> Repo.preload(:web_page_fields)
+  end
+
+  @doc """
   Lists web pages.
 
   ## Examples

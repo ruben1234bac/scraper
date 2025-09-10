@@ -5,6 +5,8 @@ defmodule Scraper.WebPage.WebPage do
 
   alias Scraper.Account.User
 
+  alias Scraper.WebPage.WebPageField
+
   @type t :: %__MODULE__{
           id: integer() | nil,
           url: String.t() | nil,
@@ -25,6 +27,8 @@ defmodule Scraper.WebPage.WebPage do
     field :is_completed, :boolean, default: false
     field :has_failed, :boolean, default: false
     belongs_to :user, User
+
+    has_many :web_page_fields, WebPageField
 
     timestamps(type: :utc_datetime)
   end

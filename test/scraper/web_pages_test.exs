@@ -355,6 +355,41 @@ defmodule Scraper.WebPagesTest do
     end
   end
 
+  describe "get_web_page!/1" do
+    test "returns web page with preloaded fields when exists" do
+      web_page = insert(:web_page)
+      field1 = insert(:web_page_field, web_page: web_page)
+      field2 = insert(:web_page_field, web_page: web_page)
+
+      result = WebPages.get_web_page!(web_page.id)
+
+      assert result.id == web_page.id
+      assert result.url == web_page.url
+      assert result.title == web_page.title
+      assert result.user_id == web_page.user_id
+      assert length(result.web_page_fields) == 2
+
+      field_ids = Enum.map(result.web_page_fields, & &1.id)
+      assert field1.id in field_ids
+      assert field2.id in field_ids
+    end
+
+    test "returns web page with empty fields list when no fields exist" do
+      web_page = insert(:web_page)
+
+      result = WebPages.get_web_page!(web_page.id)
+
+      assert result.id == web_page.id
+      assert result.web_page_fields == []
+    end
+
+    test "raises Ecto.NoResultsError when web page does not exist" do
+      assert_raise Ecto.NoResultsError, fn ->
+        WebPages.get_web_page!(99_999)
+      end
+    end
+  end
+
   describe "integration tests" do
     test "create web page and add fields to it" do
       user = insert(:user)
