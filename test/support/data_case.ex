@@ -26,6 +26,7 @@ defmodule Scraper.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Scraper.DataCase
+      import Scraper.Factory
     end
   end
 
