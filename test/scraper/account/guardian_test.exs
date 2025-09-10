@@ -226,7 +226,7 @@ defmodule Scraper.Account.GuardianTest do
     test "subject_for_token handles user struct variations" do
       user = build(:user, id: 12_345)
       assert {:ok, subject} = Guardian.subject_for_token(user, %{})
-      assert subject == "12_345"
+      assert subject == "12345"
     end
   end
 end
