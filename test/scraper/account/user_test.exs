@@ -117,7 +117,11 @@ defmodule Scraper.Account.UserTest do
     end
 
     test "username must be unique" do
-      attrs = build(:user_attrs, username: "testuser")
+      attrs = %{
+        username: "testuser",
+        password: "password123",
+        password_confirmation: "password123"
+      }
       {:ok, _user1} = %User{} |> User.changeset(attrs) |> Repo.insert()
 
       attrs2 = %{
@@ -144,15 +148,16 @@ defmodule Scraper.Account.UserTest do
       assert user.is_active == true
     end
 
-    test "user_attrs factory creates valid attributes for changeset" do
-      attrs = build(:user_attrs)
+    test "user can be created with changeset attributes" do
+      attrs = %{
+        username: "changesetuser",
+        password: "test_password123",
+        password_confirmation: "test_password123"
+      }
       changeset = User.changeset(%User{}, attrs)
       assert changeset.valid?
-    end
-
-    test "user can be inserted into database using attrs factory" do
-      attrs = build(:user_attrs)
-      assert {:ok, user} = %User{} |> User.changeset(attrs) |> Repo.insert()
+      
+      assert {:ok, user} = Repo.insert(changeset)
       assert user.id
       assert user.inserted_at
       assert user.updated_at
@@ -190,7 +195,11 @@ defmodule Scraper.Account.UserTest do
     end
 
     test "password hash can be verified" do
-      attrs = build(:user_attrs)
+      attrs = %{
+        username: "hashuser",
+        password: "test_password123",
+        password_confirmation: "test_password123"
+      }
       {:ok, user} = %User{} |> User.changeset(attrs) |> Repo.insert()
       assert Bcrypt.verify_pass("test_password123", user.password)
       refute Bcrypt.verify_pass("wrong_password", user.password)

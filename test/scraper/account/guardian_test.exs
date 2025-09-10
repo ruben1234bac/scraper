@@ -44,7 +44,11 @@ defmodule Scraper.Account.GuardianTest do
     end
 
     test "works with user struct with all fields" do
-      attrs = build(:user_attrs)
+      attrs = %{
+        username: "fulluser",
+        password: "test_password123",
+        password_confirmation: "test_password123"
+      }
       {:ok, user} = %User{} |> User.changeset(attrs) |> Repo.insert()
       claims = %{}
 
@@ -117,7 +121,11 @@ defmodule Scraper.Account.GuardianTest do
     end
 
     test "loads complete user with all associations" do
-      attrs = build(:user_attrs)
+      attrs = %{
+        username: "completeuser",
+        password: "test_password123",
+        password_confirmation: "test_password123"
+      }
       {:ok, user} = %User{} |> User.changeset(attrs) |> Repo.insert()
       claims = %{"sub" => to_string(user.id)}
 
@@ -211,7 +219,12 @@ defmodule Scraper.Account.GuardianTest do
     end
 
     test "handles inactive user" do
-      attrs = build(:user_attrs, is_active: false)
+      attrs = %{
+        username: "inactiveuser",
+        password: "test_password123",
+        password_confirmation: "test_password123",
+        is_active: false
+      }
       {:ok, inactive_user} = %User{} |> User.changeset(attrs) |> Repo.insert()
 
       # Guardian should still work with inactive users
