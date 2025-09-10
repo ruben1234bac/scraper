@@ -13,6 +13,7 @@ defmodule ScraperWeb.WebPages.IndexLive do
 
     {:ok,
      assign(socket,
+       web_page_selected: nil,
        current_user: current_user,
        form: to_form(%{}, as: "web_page"),
        web_pages: WebPages.list_web_pages(1)
@@ -34,7 +35,7 @@ defmodule ScraperWeb.WebPages.IndexLive do
         </:actions>
       </.simple_form>
     </div>
-    <div :if={@web_pages.total_entries > 0} class="w-full mt-10">
+    <div :if={@web_pages.total_entries > 0 && is_nil(@web_page_selected)} class="w-full mt-10">
       <.label>List of Web Pages</.label>
       <table class="w-full text-sm text-left rtl:text-right text-gray-700 mt-4">
         <thead class="text-xs text-left text-gray-700 uppercase ">
@@ -54,7 +55,9 @@ defmodule ScraperWeb.WebPages.IndexLive do
                 "Pending"}
             </td>
             <td class="px-6 py-4">
-              <.link navigate={"/web_pages/#{web_page.id}"}>Detail</.link>
+              <.button phx-click="detail" phx-value-id={web_page.id}>
+                Detail
+              </.button>
             </td>
           </tr>
         </tbody>
@@ -64,7 +67,42 @@ defmodule ScraperWeb.WebPages.IndexLive do
     <div :if={@web_pages.total_entries == 0} class="w-full mt-10">
       <.label>Add your first web page</.label>
     </div>
+
+    <div :if={!is_nil(@web_page_selected)} class="w-full mt-10">
+      <div class="w-full inline-flex items-center">
+        <.button phx-click="back">
+          Back
+        </.button>
+        <.label>Liks of {@web_page_selected.url}</.label>
+      </div>
+      <table class="w-full text-sm text-left rtl:text-right text-gray-700 mt-4">
+        <thead class="text-xs text-left text-gray-700 uppercase ">
+          <tr>
+            <th scope="col" class="px-6 py-3">URL</th>
+            <th scope="col" class="px-6 py-3">Content</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for={web_page_field <- @web_page_selected.web_page_fields}
+            class="bg-white border-b text-gray-900"
+          >
+            <td class="px-6 py-4">{web_page_field.value}</td>
+            <td class="px-6 py-4">{web_page_field.name}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     """
+  end
+
+  def handle_event("back", _params, socket) do
+    {:noreply, assign(socket, web_page_selected: nil)}
+  end
+
+  def handle_event("detail", %{"id" => id}, socket) do
+    web_page = WebPages.get_web_page!(id)
+    {:noreply, assign(socket, web_page_selected: web_page)}
   end
 
   def handle_event("save", %{"web_page" => %{"url" => url}}, socket) do
