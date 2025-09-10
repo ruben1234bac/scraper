@@ -4,12 +4,13 @@ defmodule Scraper.Account.User do
   import Ecto.Changeset
 
   @type t :: %__MODULE__{
-          id: integer(),
-          username: String.t(),
-          password: String.t(),
+          id: integer() | nil,
+          username: String.t() | nil,
+          password: String.t() | nil,
           is_active: boolean(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
+          password_confirmation: String.t() | nil,
+          inserted_at: DateTime.t() | nil,
+          updated_at: DateTime.t() | nil
         }
 
   @required_fields ~w(username password)a

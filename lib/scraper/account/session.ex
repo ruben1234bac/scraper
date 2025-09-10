@@ -4,13 +4,14 @@ defmodule Scraper.Account.Session do
   import Ecto.Changeset
 
   @type t :: %__MODULE__{
-          id: integer(),
-          user_id: integer(),
-          session_token: String.t(),
-          last_active_at: DateTime.t(),
-          device_info: map(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
+          id: integer() | nil,
+          user_id: integer() | nil,
+          session_token: String.t() | nil,
+          last_active_at: DateTime.t() | nil,
+          device_info: map() | nil,
+          user: Scraper.Account.User.t() | Ecto.Association.NotLoaded.t() | nil,
+          inserted_at: DateTime.t() | nil,
+          updated_at: DateTime.t() | nil
         }
 
   @required_fields ~w(user_id session_token)a
