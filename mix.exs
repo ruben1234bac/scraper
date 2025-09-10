@@ -65,7 +65,8 @@ defmodule Scraper.MixProject do
       {:ex_machina, "~> 2.7.0", only: :test},
       {:bcrypt_elixir, "~> 3.0"},
       {:guardian, "~> 2.0"},
-      {:guardian_phoenix, "~> 2.0"}
+      {:guardian_phoenix, "~> 2.0"},
+      {:scrivener_ecto, "~> 3.0"}
     ]
   end
 

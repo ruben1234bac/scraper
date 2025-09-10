@@ -27,7 +27,7 @@ defmodule ScraperWeb.Router do
   scope "/", ScraperWeb do
     pipe_through([:browser, :authenticated])
 
-    live("/", WebPages.IndexLive, :index)
+    live "/", WebPages.IndexLive, :index
   end
 
   scope "/", ScraperWeb do

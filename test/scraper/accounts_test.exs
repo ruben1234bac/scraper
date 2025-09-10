@@ -127,7 +127,11 @@ defmodule Scraper.AccountsTest do
     end
 
     test "returns error when username already exists" do
-      attrs = build(:user_attrs, username: "testuser")
+      attrs = %{
+        username: "testuser",
+        password: "password123",
+        password_confirmation: "password123"
+      }
       {:ok, _user1} = Accounts.create_user(attrs)
 
       attrs2 = %{
@@ -230,8 +234,16 @@ defmodule Scraper.AccountsTest do
     end
 
     test "multiple users can be created and authenticated independently" do
-      attrs1 = build(:user_attrs, username: "user1")
-      attrs2 = build(:user_attrs, username: "user2")
+      attrs1 = %{
+        username: "user1",
+        password: "test_password123",
+        password_confirmation: "test_password123"
+      }
+      attrs2 = %{
+        username: "user2",
+        password: "test_password123",
+        password_confirmation: "test_password123"
+      }
 
       {:ok, user1} = Accounts.create_user(attrs1)
       {:ok, user2} = Accounts.create_user(attrs2)
