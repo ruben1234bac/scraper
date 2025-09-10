@@ -5,8 +5,9 @@ defmodule Scraper.Workers.ScrapingTest do
   import ExUnit.CaptureLog
   import Mock
 
-  alias Scraper.Workers.Scraping
   alias Scraper.WebPage.{WebPage, WebPageField}
+  alias Scraper.Workers.Scraping
+
   alias Phoenix.PubSub
 
   describe "perform/1" do

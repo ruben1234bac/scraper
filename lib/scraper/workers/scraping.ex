@@ -1,4 +1,6 @@
 defmodule Scraper.Workers.Scraping do
+  @moduledoc false
+
   use Oban.Worker, queue: :default
 
   require Logger
@@ -21,7 +23,7 @@ defmodule Scraper.Workers.Scraping do
 
     with {:ok, body} <- request_url(url),
          {:ok, links} <- get_links(body) do
-      Enum.map(links, fn {[link], text} ->
+      Enum.each(links, fn {[link], text} ->
         WebPages.create_web_page_field(%{name: text, value: link, web_page_id: web_page_id})
         :timer.sleep(500)
       end)
@@ -59,6 +61,7 @@ defmodule Scraper.Workers.Scraping do
     end
   end
 
+  # credo:disable-for-lines:12
   defp get_links(body) do
     try do
       Floki.parse_document!(body)
