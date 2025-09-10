@@ -16,7 +16,8 @@ defmodule Scraper.WebPage.WebPageField do
           updated_at: DateTime.t() | nil
         }
 
-  @required_fields ~w(name value full_value web_page_id)a
+  @required_fields ~w(name value web_page_id)a
+  @optional_fields ~w(full_value)a
 
   schema "web_page_fields" do
     field :name, :string
@@ -40,7 +41,7 @@ defmodule Scraper.WebPage.WebPageField do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(web_page_field, attrs) do
     web_page_field
-    |> cast(attrs, @required_fields)
+    |> cast(attrs, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
   end
 end

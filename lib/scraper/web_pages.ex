@@ -12,6 +12,8 @@ defmodule Scraper.WebPages do
     WebPageField
   }
 
+  alias Scraper.Workers.Scraping
+
   @doc """
   Creates a new web page.
 
@@ -23,9 +25,12 @@ defmodule Scraper.WebPages do
   """
   @spec create_web_page(map()) :: {:ok, WebPage.t()} | {:error, Ecto.Changeset.t()}
   def create_web_page(attrs) do
-    %WebPage{}
-    |> WebPage.changeset(attrs)
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:web_page, WebPage.changeset(%WebPage{}, attrs))
+    |> Oban.insert("job-2", fn %{web_page: web_page} ->
+      Scraping.new(%{web_page_id: web_page.id, url: web_page.url, user_id: web_page.user_id})
+    end)
+    |> Repo.transaction()
   end
 
   @doc """

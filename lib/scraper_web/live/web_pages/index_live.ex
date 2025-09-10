@@ -4,10 +4,16 @@ defmodule ScraperWeb.WebPages.IndexLive do
   alias Scraper.Account.Guardian
   alias Scraper.WebPages
 
+  alias Phoenix.PubSub
+
   def mount(_params, session, socket) do
+    current_user = get_current_user(session)
+
+    PubSub.subscribe(Scraper.PubSub, "user:#{current_user.id}")
+
     {:ok,
      assign(socket,
-       current_user: get_current_user(session),
+       current_user: current_user,
        form: to_form(%{}, as: "web_page"),
        web_pages: WebPages.list_web_pages(1)
      )}
@@ -44,7 +50,8 @@ defmodule ScraperWeb.WebPages.IndexLive do
             <td class="px-6 py-4">{web_page.url}</td>
             <td class="px-6 py-4">{web_page.title}</td>
             <td class="px-6 py-4">
-              {(web_page.is_completed && "Completed") || "Pending"}
+              {(web_page.is_completed && "Completed") || (web_page.has_failed && "Failed") ||
+                "Pending"}
             </td>
             <td class="px-6 py-4">
               <.link navigate={"/web_pages/#{web_page.id}"}>Detail</.link>
@@ -63,11 +70,40 @@ defmodule ScraperWeb.WebPages.IndexLive do
   def handle_event("save", %{"web_page" => %{"url" => url}}, socket) do
     case WebPages.create_web_page(%{url: url, user_id: socket.assigns.current_user.id}) do
       {:ok, _web_page} ->
-        {:noreply, redirect(socket, to: "/")}
+        {:noreply, assign(socket, web_pages: WebPages.list_web_pages(1))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
+  end
+
+  def handle_info({:starting_scraping, data}, socket) do
+    {:noreply,
+     socket
+     |> put_flash(
+       :info,
+       "Scraping started for id: #{data.web_page_id}, url: #{data.url}, attempt: #{data.attempt}"
+     )}
+  end
+
+  def handle_info({:scraping_completed, data}, socket) do
+    {:noreply,
+     socket
+     |> assign(web_pages: WebPages.list_web_pages(1))
+     |> put_flash(
+       :info,
+       "Scraping completed for id: #{data.web_page_id}, url: #{data.url}"
+     )}
+  end
+
+  def handle_info({:scraping_failed, data}, socket) do
+    {:noreply,
+     socket
+     |> assign(web_pages: WebPages.list_web_pages(1))
+     |> put_flash(
+       :error,
+       "Scraping failed for id: #{data.web_page_id}, url: #{data.url}"
+     )}
   end
 
   defp get_current_user(%{"guardian_default_token" => token}) do

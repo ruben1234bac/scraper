@@ -14,7 +14,7 @@ defmodule Scraper.WebPagesTest do
         user_id: user.id
       }
 
-      assert {:ok, %WebPage{} = web_page} = WebPages.create_web_page(attrs)
+      assert {:ok, %{web_page: web_page}} = WebPages.create_web_page(attrs)
       assert web_page.url == "https://example.com"
       assert web_page.title == "Example Page"
       assert web_page.user_id == user.id
@@ -32,7 +32,7 @@ defmodule Scraper.WebPagesTest do
         user_id: user.id
       }
 
-      assert {:ok, %WebPage{} = web_page} = WebPages.create_web_page(attrs)
+      assert {:ok, %{web_page: web_page}} = WebPages.create_web_page(attrs)
       assert web_page.url == "https://minimal.com"
       assert web_page.title == nil
       assert web_page.user_id == user.id
@@ -49,7 +49,7 @@ defmodule Scraper.WebPagesTest do
         is_completed: true
       }
 
-      assert {:ok, %WebPage{} = web_page} = WebPages.create_web_page(attrs)
+      assert {:ok, %{web_page: web_page}} = WebPages.create_web_page(attrs)
       assert web_page.is_completed == true
     end
 
@@ -61,7 +61,9 @@ defmodule Scraper.WebPagesTest do
         user_id: user.id
       }
 
-      assert {:error, %Ecto.Changeset{} = changeset} = WebPages.create_web_page(attrs)
+      assert {:error, :web_page, %Ecto.Changeset{} = changeset, _} =
+               WebPages.create_web_page(attrs)
+
       assert "can't be blank" in errors_on(changeset).url
     end
 
@@ -71,14 +73,18 @@ defmodule Scraper.WebPagesTest do
         title: "Orphan Page"
       }
 
-      assert {:error, %Ecto.Changeset{} = changeset} = WebPages.create_web_page(attrs)
+      assert {:error, :web_page, %Ecto.Changeset{} = changeset, _} =
+               WebPages.create_web_page(attrs)
+
       assert "can't be blank" in errors_on(changeset).user_id
     end
 
     test "returns error when both required fields are missing" do
       attrs = %{title: "Invalid Page"}
 
-      assert {:error, %Ecto.Changeset{} = changeset} = WebPages.create_web_page(attrs)
+      assert {:error, :web_page, %Ecto.Changeset{} = changeset, _} =
+               WebPages.create_web_page(attrs)
+
       assert "can't be blank" in errors_on(changeset).url
       assert "can't be blank" in errors_on(changeset).user_id
     end
@@ -165,12 +171,10 @@ defmodule Scraper.WebPagesTest do
 
   describe "list_web_pages/1" do
     test "returns paginated web pages ordered by newest first" do
-      # Create web pages with specific timestamps
       user = insert(:user)
       old_page = insert(:web_page, user: user, title: "Old Page")
       new_page = insert(:web_page, user: user, title: "New Page")
 
-      # Update timestamps to ensure order
       Repo.update_all(
         from(w in WebPage, where: w.id == ^old_page.id),
         set: [inserted_at: ~U[2023-01-01 00:00:00Z]]
@@ -187,7 +191,6 @@ defmodule Scraper.WebPagesTest do
       assert page_result.page_number == 1
       assert length(page_result.entries) == 2
 
-      # Verify newest first
       [first_entry, second_entry] = page_result.entries
       assert first_entry.title == "New Page"
       assert second_entry.title == "Old Page"
@@ -204,19 +207,17 @@ defmodule Scraper.WebPagesTest do
 
     test "handles pagination correctly" do
       user = insert(:user)
-      # Create more pages than default page size to test pagination
+
       for i <- 1..25 do
         insert(:web_page, user: user, title: "Page #{i}")
       end
 
-      # Test first page
       page1 = WebPages.list_web_pages(1)
       assert %Scrivener.Page{} = page1
       assert page1.page_number == 1
       assert length(page1.entries) > 0
       assert page1.total_entries == 25
 
-      # Test that we can get a second page (assuming default page size < 25)
       if page1.total_pages > 1 do
         page2 = WebPages.list_web_pages(2)
         assert page2.page_number == 2
@@ -228,7 +229,6 @@ defmodule Scraper.WebPagesTest do
       user = insert(:user)
       insert(:web_page, user: user, title: "Single Page")
 
-      # Request a page that doesn't exist - Scrivener returns page 1 when out of bounds
       page_result = WebPages.list_web_pages(5)
       assert %Scrivener.Page{} = page_result
       assert page_result.page_number == 1
@@ -308,7 +308,7 @@ defmodule Scraper.WebPagesTest do
       assert "can't be blank" in errors_on(changeset).value
     end
 
-    test "returns error when full_value is missing" do
+    test "creates web page field without full_value (optional field)" do
       web_page = insert(:web_page)
 
       attrs = %{
@@ -317,8 +317,11 @@ defmodule Scraper.WebPagesTest do
         web_page_id: web_page.id
       }
 
-      assert {:error, %Ecto.Changeset{} = changeset} = WebPages.create_web_page_field(attrs)
-      assert "can't be blank" in errors_on(changeset).full_value
+      assert {:ok, %WebPageField{} = field} = WebPages.create_web_page_field(attrs)
+      assert field.name == "field_name"
+      assert field.value == "Value"
+      assert field.full_value == nil
+      assert field.web_page_id == web_page.id
     end
 
     test "returns error when web_page_id is missing" do
@@ -338,7 +341,6 @@ defmodule Scraper.WebPagesTest do
       assert {:error, %Ecto.Changeset{} = changeset} = WebPages.create_web_page_field(attrs)
       assert "can't be blank" in errors_on(changeset).name
       assert "can't be blank" in errors_on(changeset).value
-      assert "can't be blank" in errors_on(changeset).full_value
       assert "can't be blank" in errors_on(changeset).web_page_id
     end
 
@@ -357,16 +359,14 @@ defmodule Scraper.WebPagesTest do
     test "create web page and add fields to it" do
       user = insert(:user)
 
-      # Create web page
       web_page_attrs = %{
         url: "https://integration-test.com",
         title: "Integration Test Page",
         user_id: user.id
       }
 
-      assert {:ok, web_page} = WebPages.create_web_page(web_page_attrs)
+      assert {:ok, %{web_page: web_page}} = WebPages.create_web_page(web_page_attrs)
 
-      # Add fields to the web page
       field_attrs = %{
         name: "main_heading",
         value: "Welcome",
@@ -381,11 +381,9 @@ defmodule Scraper.WebPagesTest do
     test "update web page completion status and verify it persists" do
       web_page = insert(:web_page, is_completed: false)
 
-      # Mark as completed
       assert {:ok, updated_page} = WebPages.update_web_page(web_page.id, %{is_completed: true})
       assert updated_page.is_completed == true
 
-      # Verify it's in the list
       page_result = WebPages.list_web_pages(1)
       found_page = Enum.find(page_result.entries, &(&1.id == web_page.id))
       assert found_page.is_completed == true
@@ -394,11 +392,12 @@ defmodule Scraper.WebPagesTest do
     test "create multiple web pages and verify listing order" do
       user = insert(:user)
 
-      # Create pages with manual timestamp control
-      {:ok, page1} = WebPages.create_web_page(%{url: "https://first.com", user_id: user.id})
-      {:ok, page2} = WebPages.create_web_page(%{url: "https://second.com", user_id: user.id})
+      {:ok, %{web_page: page1}} =
+        WebPages.create_web_page(%{url: "https://first.com", user_id: user.id})
 
-      # Update timestamps to ensure order
+      {:ok, %{web_page: page2}} =
+        WebPages.create_web_page(%{url: "https://second.com", user_id: user.id})
+
       Repo.update_all(
         from(w in WebPage, where: w.id == ^page1.id),
         set: [inserted_at: ~U[2023-01-01 00:00:00Z]]
@@ -409,7 +408,6 @@ defmodule Scraper.WebPagesTest do
         set: [inserted_at: ~U[2023-12-31 00:00:00Z]]
       )
 
-      # List should show newest first
       page_result = WebPages.list_web_pages(1)
       [first_listed, second_listed] = page_result.entries
 

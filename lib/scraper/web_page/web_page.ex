@@ -11,17 +11,19 @@ defmodule Scraper.WebPage.WebPage do
           title: String.t() | nil,
           user_id: integer() | nil,
           is_completed: boolean() | nil,
+          has_failed: boolean() | nil,
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }
 
   @required_fields ~w(url user_id)a
-  @optional_fields ~w(title is_completed)a
+  @optional_fields ~w(title is_completed has_failed)a
 
   schema "web_pages" do
     field :url, :string
     field :title, :string
     field :is_completed, :boolean, default: false
+    field :has_failed, :boolean, default: false
     belongs_to :user, User
 
     timestamps(type: :utc_datetime)
