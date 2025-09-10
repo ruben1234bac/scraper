@@ -61,7 +61,9 @@ defmodule Scraper.MixProject do
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
-      {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
+      {:ex_machina, "~> 2.7.0", only: :test},
+      {:bcrypt_elixir, "~> 3.0"}
     ]
   end
 
