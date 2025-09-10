@@ -1,8 +1,8 @@
 defmodule Scraper.AccountsTest do
   use Scraper.DataCase, async: true
 
-  alias Scraper.Accounts
   alias Scraper.Account.User
+  alias Scraper.Accounts
 
   describe "create_user/0" do
     test "return error when params is empty" do

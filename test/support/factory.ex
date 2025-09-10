@@ -22,7 +22,8 @@ defmodule Scraper.Factory do
   def session_factory do
     %Scraper.Account.Session{
       user: build(:user),
-      session_token: sequence(:session_token, &"token_#{&1}_#{System.unique_integer([:positive])}"),
+      session_token:
+        sequence(:session_token, &"token_#{&1}_#{System.unique_integer([:positive])}"),
       last_active_at: DateTime.utc_now(),
       device_info: %{
         "browser" => "Chrome",

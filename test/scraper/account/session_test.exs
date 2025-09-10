@@ -54,7 +54,13 @@ defmodule Scraper.Account.SessionTest do
 
     test "session_token and user_id combination must be unique" do
       user = insert(:user)
-      session_attrs = build(:session) |> Map.from_struct() |> Map.put(:user_id, user.id) |> Map.put(:session_token, "unique_token")
+
+      session_attrs =
+        build(:session)
+        |> Map.from_struct()
+        |> Map.put(:user_id, user.id)
+        |> Map.put(:session_token, "unique_token")
+
       {:ok, _session1} = %Session{} |> Session.changeset(session_attrs) |> Repo.insert()
 
       attrs = %{user_id: user.id, session_token: "unique_token"}
@@ -73,7 +79,7 @@ defmodule Scraper.Account.SessionTest do
       session_token = "shared_token"
 
       _session1 = insert(:session, user: user1, session_token: session_token)
-      
+
       attrs = %{user_id: user2.id, session_token: session_token}
       changeset = Session.changeset(%Session{}, attrs)
 
@@ -124,12 +130,12 @@ defmodule Scraper.Account.SessionTest do
     test "session belongs to user" do
       user = insert(:user)
       session = insert(:session, user: user)
-      
-      session_with_user = 
+
+      session_with_user =
         Session
         |> Repo.get(session.id)
         |> Repo.preload(:user)
-      
+
       assert session_with_user.user.id == user.id
       assert session_with_user.user.username == user.username
     end

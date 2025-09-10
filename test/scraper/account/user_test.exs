@@ -5,7 +5,12 @@ defmodule Scraper.Account.UserTest do
 
   describe "changeset/2" do
     test "valid changeset with required fields" do
-      attrs = %{username: "testuser", password: "password123", password_confirmation: "password123"}
+      attrs = %{
+        username: "testuser",
+        password: "password123",
+        password_confirmation: "password123"
+      }
+
       changeset = User.changeset(%User{}, attrs)
 
       assert changeset.valid?
@@ -56,7 +61,12 @@ defmodule Scraper.Account.UserTest do
     end
 
     test "valid changeset when password confirmation matches" do
-      attrs = %{username: "testuser", password: "password123", password_confirmation: "password123"}
+      attrs = %{
+        username: "testuser",
+        password: "password123",
+        password_confirmation: "password123"
+      }
+
       changeset = User.changeset(%User{}, attrs)
 
       assert changeset.valid?
@@ -71,7 +81,12 @@ defmodule Scraper.Account.UserTest do
     end
 
     test "invalid changeset when username is too long" do
-      attrs = %{username: String.duplicate("a", 256), password: "password123", password_confirmation: "password123"}
+      attrs = %{
+        username: String.duplicate("a", 256),
+        password: "password123",
+        password_confirmation: "password123"
+      }
+
       changeset = User.changeset(%User{}, attrs)
 
       refute changeset.valid?
@@ -88,7 +103,13 @@ defmodule Scraper.Account.UserTest do
 
     test "invalid changeset when password is too long" do
       long_password = String.duplicate("a", 256)
-      attrs = %{username: "testuser", password: long_password, password_confirmation: long_password}
+
+      attrs = %{
+        username: "testuser",
+        password: long_password,
+        password_confirmation: long_password
+      }
+
       changeset = User.changeset(%User{}, attrs)
 
       refute changeset.valid?
@@ -98,8 +119,12 @@ defmodule Scraper.Account.UserTest do
     test "username must be unique" do
       attrs = build(:user_attrs, username: "testuser")
       {:ok, _user1} = %User{} |> User.changeset(attrs) |> Repo.insert()
-      
-      attrs2 = %{username: "testuser", password: "password123", password_confirmation: "password123"}
+
+      attrs2 = %{
+        username: "testuser",
+        password: "password123",
+        password_confirmation: "password123"
+      }
 
       assert {:error, changeset} =
                %User{}
@@ -143,9 +168,14 @@ defmodule Scraper.Account.UserTest do
 
   describe "password hashing" do
     test "password is hashed when changeset is valid" do
-      attrs = %{username: "testuser", password: "password123", password_confirmation: "password123"}
+      attrs = %{
+        username: "testuser",
+        password: "password123",
+        password_confirmation: "password123"
+      }
+
       changeset = User.changeset(%User{}, attrs)
-      
+
       assert changeset.valid?
       assert String.starts_with?(changeset.changes.password, "$2b$")
       refute changeset.changes.password == "password123"
@@ -154,7 +184,7 @@ defmodule Scraper.Account.UserTest do
     test "password is not hashed when changeset is invalid" do
       attrs = %{username: "testuser", password: "password123", password_confirmation: "different"}
       changeset = User.changeset(%User{}, attrs)
-      
+
       refute changeset.valid?
       assert changeset.changes.password == "password123"
     end
@@ -162,7 +192,6 @@ defmodule Scraper.Account.UserTest do
     test "password hash can be verified" do
       attrs = build(:user_attrs)
       {:ok, user} = %User{} |> User.changeset(attrs) |> Repo.insert()
-      
       assert Bcrypt.verify_pass("test_password123", user.password)
       refute Bcrypt.verify_pass("wrong_password", user.password)
     end
