@@ -17,7 +17,7 @@ defmodule ScraperWeb.Router do
   scope "/", ScraperWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/login", Auth.LoginLive, :index
   end
 
   # Other scopes may use custom stacks.
