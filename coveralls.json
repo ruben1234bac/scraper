@@ -4,7 +4,8 @@
         "lib/scraper.ex",
         "lib/scraper/application.ex",
         "lib/scraper_web.ex",
-        "lib/scraper_web/*"
+        "lib/scraper_web/*",
+        "lib/scraper/account/session_error_handler.ex"
     ],
     "coverage_options": {
         "treat_no_relevant_lines_as_covered": true,
