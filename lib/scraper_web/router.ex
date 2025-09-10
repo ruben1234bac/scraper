@@ -14,10 +14,27 @@ defmodule ScraperWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :authenticated do
+    plug(ScraperWeb.Plugs.Guardian)
+  end
+
+  scope "/", ScraperWeb do
+    pipe_through :browser
+
+    get "/start_session", PageController, :session
+  end
+
+  scope "/", ScraperWeb do
+    pipe_through([:browser, :authenticated])
+
+    live("/", WebPages.IndexLive, :index)
+  end
+
   scope "/", ScraperWeb do
     pipe_through :browser
 
     live "/login", Auth.LoginLive, :index
+    live "/register", Auth.RegisterLive, :index
   end
 
   # Other scopes may use custom stacks.

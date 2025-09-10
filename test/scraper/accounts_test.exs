@@ -1,8 +1,32 @@
 defmodule Scraper.AccountsTest do
   use Scraper.DataCase, async: true
 
-  alias Scraper.Account.User
+  alias Scraper.Account.{Session, User}
   alias Scraper.Accounts
+
+  describe "create_session/1" do
+    test "creates session with valid attributes" do
+      user = insert(:user)
+
+      attrs = %{
+        user_id: user.id,
+        session_token: "session_token"
+      }
+
+      assert {:ok, %Session{} = session} = Accounts.create_session(attrs)
+      assert session.user_id == user.id
+      assert session.session_token == "session_token"
+      assert session.id
+      assert session.inserted_at
+      assert session.updated_at
+    end
+
+    test "return error when params is empty" do
+      assert {:error, %Ecto.Changeset{} = changeset} = Accounts.create_session(%{})
+      assert "can't be blank" in errors_on(changeset).user_id
+      assert "can't be blank" in errors_on(changeset).session_token
+    end
+  end
 
   describe "create_user/0" do
     test "return error when params is empty" do

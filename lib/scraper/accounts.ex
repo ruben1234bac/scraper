@@ -6,7 +6,7 @@ defmodule Scraper.Accounts do
 
   import Ecto.Query
 
-  alias Scraper.Account.User
+  alias Scraper.Account.{Session, User}
 
   alias Scraper.Repo
 
@@ -31,6 +31,40 @@ defmodule Scraper.Accounts do
   end
 
   @doc """
+  Gets a single user.
+
+  ## Examples
+
+      iex> get_user!(123)
+      %User{}
+
+      iex> get_user!(456)
+      nil
+
+  """
+  @spec get_user!(binary() | integer()) :: User.t() | nil
+  def get_user!(id), do: Repo.get!(User, id)
+
+  @doc """
+  Creates a session.
+
+  ## Examples
+
+      iex> create_session(%{user_id: 123, session_token: "token"})
+      {:ok, %Session{}}
+
+      iex> create_session(%{user_id: 123, session_token: ""})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_session(map()) :: {:ok, Session.t()} | {:error, Ecto.Changeset.t()}
+  def create_session(attrs) do
+    %Session{}
+    |> Session.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
   Authenticates the user with the given username and password.
 
   ## Examples
@@ -44,7 +78,8 @@ defmodule Scraper.Accounts do
   """
   @spec authenticate_user(String.t(), String.t()) ::
           {:ok, User.t()} | {:error, :invalid_credentials}
-  def authenticate_user(username, plain_text_password) when is_binary(username) and is_binary(plain_text_password) do
+  def authenticate_user(username, plain_text_password)
+      when is_binary(username) and is_binary(plain_text_password) do
     query = from(u in User, where: u.username == ^username)
 
     case Repo.one(query) do
