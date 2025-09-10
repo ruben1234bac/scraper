@@ -63,7 +63,9 @@ defmodule Scraper.MixProject do
       {:excoveralls, "~> 0.18", only: :test},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_machina, "~> 2.7.0", only: :test},
-      {:bcrypt_elixir, "~> 3.0"}
+      {:bcrypt_elixir, "~> 3.0"},
+      {:guardian, "~> 2.0"},
+      {:guardian_phoenix, "~> 2.0"}
     ]
   end
 

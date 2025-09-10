@@ -22,6 +22,10 @@ config :scraper, ScraperWeb.Endpoint,
   pubsub_server: Scraper.PubSub,
   live_view: [signing_salt: "SbdGqygB"]
 
+config :scraper, Scraper.Account.Guardian,
+  issuer: "scraper",
+  secret_key: "3I29XeLlVMvRU7t1hnRaHEGEf31vtMcrOZg2txo3X9cBNj5OzMUKU3/nuLrUuwpK"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
